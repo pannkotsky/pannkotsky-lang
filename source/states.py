@@ -149,7 +149,7 @@ class State11(FinalState):
 
 
 class State12(State):
-    """ Less or LTE """
+    """ Less or LTE in progress """
     index = 12
 
     @classmethod
@@ -160,7 +160,7 @@ class State12(State):
 
 
 class State13(State):
-    """ Greater or GTE """
+    """ Greater or GTE in progress """
     index = 13
 
     @classmethod
@@ -171,7 +171,7 @@ class State13(State):
 
 
 class State14(State):
-    """ Equality in progress 1 """
+    """ Equality in progress """
     index = 14
 
     @classmethod
