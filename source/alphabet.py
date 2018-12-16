@@ -8,5 +8,5 @@ DIGITS = list(map(str, range(10)))
 ALPHABET = set()
 ALPHABET.update(LETTERS)
 ALPHABET.update(DIGITS)
-for t, _ in tokens:
-    ALPHABET.update(list(t))
+for token_args in tokens:
+    ALPHABET.update(list(token_args[0]))
