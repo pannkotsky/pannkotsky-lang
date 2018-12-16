@@ -31,7 +31,6 @@ tokens = [
     ('repeat', 'loop operators block start'),
     ('until', 'loop condition start'),
     ('if', 'condition start'),
-    (' ', 'space', "' '"),
     ('goto', 'goto statement'),
     ('label', 'label for goto'),
     ('print', 'output operator'),
@@ -102,16 +101,14 @@ if __name__ == '__main__':
 +---------+------+----------------------------+
 | if      |   17 | condition start            |
 +---------+------+----------------------------+
-| ' '     |   18 | space                      |
+| goto    |   18 | goto statement             |
 +---------+------+----------------------------+
-| goto    |   19 | goto statement             |
+| label   |   19 | label for goto             |
 +---------+------+----------------------------+
-| label   |   20 | label for goto             |
+| print   |   20 | output operator            |
 +---------+------+----------------------------+
-| print   |   21 | output operator            |
+| _IDENT  |   21 | ident                      |
 +---------+------+----------------------------+
-| _IDENT  |   22 | ident                      |
-+---------+------+----------------------------+
-| _CONST  |   23 | const                      |
+| _CONST  |   22 | const                      |
 +---------+------+----------------------------+
 """

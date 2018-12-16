@@ -58,8 +58,6 @@ class Scanner:
     def save_token(self):
         # TODO: detect redeclaration of variable, undeclared variable
         # TODO: detect labels
-        if not self.current_token.strip():
-            return
         token_repr = self.current_token
         token_id = None
         ident_const_id = ''

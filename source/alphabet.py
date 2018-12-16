@@ -6,6 +6,7 @@ LETTERS = string.ascii_lowercase
 DIGITS = list(map(str, range(10)))
 
 ALPHABET = set()
+ALPHABET.add(' ')
 ALPHABET.update(LETTERS)
 ALPHABET.update(DIGITS)
 for token_args in tokens:
