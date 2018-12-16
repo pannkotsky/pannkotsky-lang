@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 import csv
 import os
 import sys
 import time
 
-from states import states_map, ScanError
+from states import states_map, LexicalError
 
 
 class Scanner:
@@ -28,8 +30,8 @@ class Scanner:
         try:
             state_index = self.current_state.get_next_state(self.current_char)
             return states_map.get(state_index)
-        except ScanError as e:
-            print(f'Error at {self.numline}:{self.numchar} {e}')
+        except LexicalError as e:
+            print(f'Lexical error at {self.numline}:{self.numchar} {e}')
             exit(-1)
 
     def process_line(self, line):

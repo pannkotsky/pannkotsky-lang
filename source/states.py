@@ -18,7 +18,7 @@ import helpers
 """
 
 
-class ScanError(Exception):
+class LexicalError(Exception):
     pass
 
 
@@ -37,12 +37,12 @@ class State:
     @classmethod
     def get_next_state(cls, c):
         if not helpers.is_symbol(c):
-            raise ScanError(f'Unexpected token: {c}')
+            raise LexicalError(f'Unexpected token: {c}')
         if c in cls.transitions_map:
             return cls.transitions_map[c]
         state = cls._get_next_state(c)
         if state is None:
-            raise ScanError(f'Unexpected token: {c}')
+            raise LexicalError(f'Unexpected token: {c}')
         return state
 
 
@@ -92,15 +92,6 @@ class State0(State):
             return 2
 
 
-class StateMinus1(State):
-    index = -1
-    label = "Return char and go to initial state"
-
-    @classmethod
-    def _get_next_state(cls, c):
-        return 0
-
-
 class State1(State):
     index = 1
     label = "Ident in progress"
@@ -121,7 +112,7 @@ class State2(State):
         if helpers.is_digit(c):
             return 2
         if helpers.is_letter(c):
-            raise ScanError(f'Unexpected token: {c}')
+            raise LexicalError(f'Unexpected token: {c}')
         return 17
 
 
@@ -133,7 +124,6 @@ class State3(State):
     def _get_next_state(cls, c):
         if c == '=':
             return 18
-        raise ScanError(f'Unexpected token: {c}')
 
 
 class State4(FinalState):
@@ -168,6 +158,38 @@ class State11(FinalState):
     index = 11
 
 
+class State12(State):
+    index = 12
+    label = "Less or LTE"
+
+    @classmethod
+    def _get_next_state(cls, c):
+        if c == '=':
+            return 21
+        return 22
+
+
+class State13(State):
+    index = 13
+    label = "Greater or GTE"
+
+    @classmethod
+    def _get_next_state(cls, c):
+        if c == '=':
+            return 23
+        return 24
+
+
+class State14(State):
+    index = 14
+    label = "Equality in progress 1"
+
+    @classmethod
+    def _get_next_state(cls, c):
+        if c == '=':
+            return 20
+
+
 class State15(State):
     index = 15
     label = "Space in progress"
@@ -199,9 +221,33 @@ class State19(FinalStateWithReturn):
     label = "Space completed"
 
 
+class State20(FinalState):
+    index = 20
+    label = "Equality completed"
+
+
+class State21(FinalState):
+    index = 21
+    label = "LTE completed"
+
+
+class State22(FinalStateWithReturn):
+    index = 22
+    label = "Less completed"
+
+
+class State23(FinalState):
+    index = 23
+    label = "GTE completed"
+
+
+class State24(FinalStateWithReturn):
+    index = 24
+    label = "Greater completed"
+
+
 states_map = {
     0: State0,
-    -1: StateMinus1,
     1: State1,
     2: State2,
     3: State3,
@@ -213,11 +259,19 @@ states_map = {
     9: State9,
     10: State10,
     11: State11,
+    12: State12,
+    13: State13,
+    14: State14,
     15: State15,
     16: State16,
     17: State17,
     18: State18,
     19: State19,
+    20: State20,
+    21: State21,
+    22: State22,
+    23: State23,
+    24: State24,
 }
 
 final_state_token_type_map = {
@@ -232,5 +286,10 @@ final_state_token_type_map = {
     16: 'Ident',
     17: 'Number',
     18: ':=',
-    19: None
+    19: None,
+    20: '==',
+    21: '<=',
+    22: '<',
+    23: '>=',
+    24: '>',
 }
