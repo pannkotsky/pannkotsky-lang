@@ -1,22 +1,5 @@
 import helpers
 
-"""
-0: initial state
--1: char return
-1: ident in progress
-2: number in progress
-3: assignment in progress
-4-11: simple states
-12: < or <=
-13: > or >=
-14: == in progress
-15: space in progress
-16: ident completed
-17: number completed
-18: assignment completed
-19: space completed
-"""
-
 
 class LexicalError(Exception):
     pass
@@ -27,7 +10,6 @@ class State:
     is_initial = False
     is_final = False
     with_return = False
-    label = None
     transitions_map = {}
 
     @classmethod
@@ -64,9 +46,9 @@ class FinalStateWithReturn(State):
 
 
 class State0(State):
+    """ Initial state """
     index = 0
     is_initial = True
-    label = "Initial state"
 
     transitions_map = {
         ':': 3,
@@ -93,8 +75,8 @@ class State0(State):
 
 
 class State1(State):
+    """ Ident in progress """
     index = 1
-    label = "Ident in progress"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -104,8 +86,8 @@ class State1(State):
 
 
 class State2(State):
+    """ Const in progress """
     index = 2
-    label = "Number in progress"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -117,8 +99,8 @@ class State2(State):
 
 
 class State3(State):
+    """ Assignment in progress """
     index = 3
-    label = "Assignment in progress"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -127,40 +109,48 @@ class State3(State):
 
 
 class State4(FinalState):
+    """ + """
     index = 4
 
 
 class State5(FinalState):
+    """ - """
     index = 5
 
 
 class State6(FinalState):
+    """ * """
     index = 6
 
 
 class State7(FinalState):
+    """ / """
     index = 7
 
 
 class State8(FinalState):
+    """ ^ """
     index = 8
 
 
 class State9(FinalState):
+    """ ( """
     index = 9
 
 
 class State10(FinalState):
+    """ ) """
     index = 10
 
 
 class State11(FinalState):
+    """ \n """
     index = 11
 
 
 class State12(State):
+    """ Less or LTE """
     index = 12
-    label = "Less or LTE"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -170,8 +160,8 @@ class State12(State):
 
 
 class State13(State):
+    """ Greater or GTE """
     index = 13
-    label = "Greater or GTE"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -181,8 +171,8 @@ class State13(State):
 
 
 class State14(State):
+    """ Equality in progress 1 """
     index = 14
-    label = "Equality in progress 1"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -191,8 +181,8 @@ class State14(State):
 
 
 class State15(State):
+    """ Space in progress """
     index = 15
-    label = "Space in progress"
 
     @classmethod
     def _get_next_state(cls, c):
@@ -202,48 +192,48 @@ class State15(State):
 
 
 class State16(FinalStateWithReturn):
+    """ Ident completed """
     index = 16
-    label = "Ident completed"
 
 
 class State17(FinalStateWithReturn):
+    """ Number completed """
     index = 17
-    label = "Number completed"
 
 
 class State18(FinalState):
+    """ Assignment completed """
     index = 18
-    label = "Assignment completed"
 
 
 class State19(FinalStateWithReturn):
+    """ Space completed """
     index = 19
-    label = "Space completed"
 
 
 class State20(FinalState):
+    """ Equality completed """
     index = 20
-    label = "Equality completed"
 
 
 class State21(FinalState):
+    """ LTE completed """
     index = 21
-    label = "LTE completed"
 
 
 class State22(FinalStateWithReturn):
+    """ Less completed """
     index = 22
-    label = "Less completed"
 
 
 class State23(FinalState):
+    """ GTE completed """
     index = 23
-    label = "GTE completed"
 
 
 class State24(FinalStateWithReturn):
+    """ Greater completed """
     index = 24
-    label = "Greater completed"
 
 
 states_map = {
