@@ -1,6 +1,6 @@
 import string
 
-from tokens import tokens
+from .tokens import tokens
 
 LETTERS = string.ascii_lowercase
 DIGITS = list(map(str, range(10)))

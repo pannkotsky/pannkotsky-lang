@@ -1,4 +1,4 @@
-from alphabet import ALPHABET, LETTERS, DIGITS
+from .alphabet import ALPHABET, LETTERS, DIGITS
 
 
 def is_symbol(symbol):

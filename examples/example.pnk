@@ -1,0 +1,6 @@
+var hello := 16
+var a := 2 + 3
+print hello - a
+print a < hello
+print a >= 5
+print 5 * (a - 2) < a / 3^2

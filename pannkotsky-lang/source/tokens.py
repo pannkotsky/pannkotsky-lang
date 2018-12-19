@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 class Token:
     def __init__(self, id, token, description, representation=None):
         self.id = id
@@ -44,21 +41,6 @@ for index, args in enumerate(tokens):
     token = Token(index, *args)
     tokens_id_map[index] = token
     tokens_map[args[0]] = token
-
-
-def main():
-    from tabulate import tabulate
-    headers = ['Token', 'Id', 'Description']
-    table = []
-    for token_args in tokens:
-        token = token_args[0]
-        token_obj = tokens_map[token]
-        table.append([token_obj.representation, token_obj.id, token_obj.description])
-    print(tabulate(table, headers, tablefmt='grid'))
-
-
-if __name__ == '__main__':
-    main()
 
 
 """
