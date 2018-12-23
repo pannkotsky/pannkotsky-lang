@@ -47,6 +47,10 @@ def scan(input_file):
     headers = ['Const', 'Id']
     click.echo(tabulate(scanner.constants_map.items(), headers, 'grid'))
 
+    click.echo("\nLabels table")
+    headers = ['Label', 'Id']
+    click.echo(tabulate(scanner.labels_map.items(), headers, 'grid'))
+
 
 if __name__ == '__main__':
     cli()

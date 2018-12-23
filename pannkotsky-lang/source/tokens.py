@@ -29,10 +29,11 @@ tokens = [
     ('until', 'loop condition start'),
     ('if', 'condition start'),
     ('goto', 'goto statement'),
-    ('label', 'label for goto'),
+    ('label', 'label declaration'),
     ('print', 'output operator'),
     ('_IDENT', 'ident'),
     ('_CONST', 'const'),
+    ('_LABEL', 'label'),
 ]
 
 tokens_id_map = {}
@@ -85,12 +86,14 @@ for index, args in enumerate(tokens):
 +---------+------+----------------------------+
 | goto    |   18 | goto statement             |
 +---------+------+----------------------------+
-| label   |   19 | label for goto             |
+| label   |   19 | label declaration          |
 +---------+------+----------------------------+
 | print   |   20 | output operator            |
 +---------+------+----------------------------+
 | _IDENT  |   21 | ident                      |
 +---------+------+----------------------------+
 | _CONST  |   22 | const                      |
++---------+------+----------------------------+
+| _LABEL  |   23 | label                      |
 +---------+------+----------------------------+
 """

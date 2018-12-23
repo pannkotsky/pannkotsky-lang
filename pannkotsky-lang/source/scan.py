@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import csv
 
-from .states import final_state_token_type_map, states_map, LexicalError
+from .errors import LexicalError, SemanticError
+from .states import final_state_token_type_map, states_map, UnexpectedTokenError
 from .tokens import tokens_map
 
 
@@ -10,6 +11,7 @@ class Scanner:
         self.scan_tokens = []
         self.idents_map = {}
         self.constants_map = {}
+        self.labels_map = {}
 
         self.numline = 1
         self.numchar = 1
@@ -31,9 +33,9 @@ class Scanner:
         try:
             state_index = self.current_state.get_next_state(self.current_char)
             return states_map.get(state_index)
-        except LexicalError as e:
-            print(f'Lexical error at {self.numline}:{self.numchar} {e}')
-            exit(-1)
+        except UnexpectedTokenError:
+            raise LexicalError(f'Unexpected token: {self.current_char}',
+                               self.numline, self.numchar)
 
     def process_line(self, line):
         self.numchar = 0
@@ -54,6 +56,8 @@ class Scanner:
     def save_token(self):
         # TODO: detect redeclaration of variable, undeclared variable
         # TODO: detect labels
+        if not self.current_token.strip(' '):
+            return
         token_repr = self.current_token
         token_id = None
         ident_const_id = ''
@@ -64,13 +68,35 @@ class Scanner:
         else:
             token_type = final_state_token_type_map.get(self.current_state.index)
             if token_type == 'Ident':
-                token_id = tokens_map['_IDENT'].id
-                ident_const_id = self.idents_map.setdefault(
-                    self.current_token, len(self.idents_map) + 1)
+                is_var_declared = self.scan_tokens and self.scan_tokens[-1][1] == 'var'
+                is_label_declared = self.scan_tokens and self.scan_tokens[-1][1] == 'label'
+                if self.current_token in self.idents_map:
+                    if is_var_declared or is_label_declared:
+                        raise SemanticError(f'Repeated identifier declaration: {self.current_token}',
+                                            self.numline, self.numchar)
+                    token_id = tokens_map['_IDENT'].id
+                    ident_const_id = self.idents_map[self.current_token]
+                elif self.current_token in self.labels_map:
+                    if is_var_declared or is_label_declared:
+                        raise SemanticError(f'Repeated identifier declaration: {self.current_token}',
+                                            self.numline, self.numchar)
+                    token_id = tokens_map['_LABEL'].id
+                    ident_const_id = self.labels_map[self.current_token]
+                elif is_var_declared:
+                    token_id = tokens_map['_IDENT'].id
+                    ident_const_id = self.idents_map.setdefault(
+                        self.current_token, len(self.idents_map))
+                elif is_label_declared:
+                    token_id = tokens_map['_LABEL'].id
+                    ident_const_id = self.labels_map.setdefault(
+                        self.current_token, len(self.labels_map))
+                else:
+                    raise SemanticError(f'Undeclared identifier: {self.current_token}',
+                                        self.numline, self.numchar)
             elif token_type == 'Const':
                 token_id = tokens_map['_CONST'].id
                 ident_const_id = self.constants_map.setdefault(
-                    self.current_token, len(self.constants_map) + 1)
+                    self.current_token, len(self.constants_map))
         self.scan_tokens.append([
             self.numline,
             token_repr,

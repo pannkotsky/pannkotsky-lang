@@ -1,7 +1,7 @@
 from . import helpers
 
 
-class LexicalError(Exception):
+class UnexpectedTokenError(Exception):
     pass
 
 
@@ -19,12 +19,12 @@ class State:
     @classmethod
     def get_next_state(cls, c):
         if not helpers.is_symbol(c):
-            raise LexicalError(f'Unexpected token: {c}')
+            raise UnexpectedTokenError
         if c in cls.transitions_map:
             return cls.transitions_map[c]
         state = cls._get_next_state(c)
         if state is None:
-            raise LexicalError(f'Unexpected token: {c}')
+            raise UnexpectedTokenError
         return state
 
 
@@ -94,7 +94,7 @@ class State2(State):
         if helpers.is_digit(c):
             return 2
         if helpers.is_letter(c):
-            raise LexicalError(f'Unexpected token: {c}')
+            raise UnexpectedTokenError
         return 17
 
 

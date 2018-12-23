@@ -1,5 +1,5 @@
 Program = Block .
-Block = Statement { Separator Statement } .
+Block = Statement Separator { Statement } .
 Statement = Assignment | Loop | Condition | Goto | Label .
 Assignment = var Space Ident { Space } ':=' { Space } MultiExpression .
 MultiExpression = Expression { { Space } Operation { Space } Expression } .
