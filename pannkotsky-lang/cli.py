@@ -37,7 +37,8 @@ def scan(input_file):
 
     click.echo("Program tokens table")
     headers = ['Line no', 'Token', 'Id', 'Ident/Const id']
-    click.echo(tabulate(scanner.scan_tokens, headers, 'grid'))
+    rows = [scan_token.to_table_row for scan_token in scanner.scan_tokens]
+    click.echo(tabulate(rows, headers, 'grid'))
 
     click.echo("\nIdentifiers table")
     headers = ['Ident', 'Id']

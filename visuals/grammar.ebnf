@@ -1,17 +1,17 @@
 Program = Block .
-Block = Statement Separator { Statement } .
-Statement = Assignment | Loop | Condition | Goto | Label .
-Assignment = var Space Ident { Space } ':=' { Space } MultiExpression .
-MultiExpression = Expression { { Space } Operation { Space } Expression } .
-Expression = Operand { { Space } Operation { Space } Operand } | '(' Expression ')' .
+Block = Statement { Statement } .
+Statement = { Assignment | Loop | Condition | Goto | Label | Output } Separator .
+Assignment = var Space Ident { Space } ':=' { Space } Expression .
+Expression = Operand { { Space } Operation { Space } Expression } | '(' Expression ')' .
 Operand = Ident | Number .
 Number = Digit { Digit } .
 Loop = repeat Separator Block Separator until Space LogicalExpression .
-LogicalExpression = MultiExpression { Space } LogicalOperation { Space } MultiExpression .
+LogicalExpression = Expression { Space } LogicalOperation { Space } Expression .
 Condition = if Space LogicalExpression Separator Block .
 Goto = goto Space Ident .
 Label = label Space Ident .
 Ident = Letter { Letter | Digit } .
+Output = print Space Expression .
 Letter = a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z .
 Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' .
 Operation = '+' | '-' | '*' | '/' | '^' .

@@ -1,16 +1,21 @@
 import sys
 
 
-class LanguageError(Exception):
-    def __init__(self, message, line_no, char_no):
-        message = f'{self.__class__.__name__} at line {line_no}, char {char_no}: {message}'
+class PKLanguageError(Exception):
+    def __init__(self, message: str, line_no: int, char_no: int=None):
+        char_text = f', char {char_no}' if char_no else ''
+        message = f'{self.__class__.__name__} at line {line_no}{char_text}: {message}'
         self.args = (message,)
         sys.exit(self)
 
 
-class LexicalError(LanguageError):
+class PKLLexicalError(PKLanguageError):
     pass
 
 
-class SemanticError(LanguageError):
+class PKLSemanticError(PKLanguageError):
+    pass
+
+
+class PKLSyntaxError(PKLanguageError):
     pass

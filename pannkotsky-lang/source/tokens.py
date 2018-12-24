@@ -1,5 +1,5 @@
 class Token:
-    def __init__(self, id, token, description, representation=None):
+    def __init__(self, id: int, token: str, description: str, representation: str=None):
         self.id = id
         self.token = token
         self.description = description
