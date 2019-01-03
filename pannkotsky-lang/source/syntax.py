@@ -144,7 +144,7 @@ class SyntaxAnalyzer:
         total_processed += self.check_token(tokens[total_processed:], ['_LABEL'])
         return total_processed
 
-    def print(self, tokens: ScanTokens) -> int:
+    def output(self, tokens: ScanTokens) -> int:
         total_processed = 0
         total_processed += self.check_token(tokens[total_processed:], ['print'])
         total_processed += self.expression(tokens[total_processed:])

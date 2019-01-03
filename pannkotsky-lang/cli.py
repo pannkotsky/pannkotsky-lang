@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-import os
-import time
-
 import click
 from tabulate import tabulate
 
@@ -28,16 +25,16 @@ def tokens_list():
 @cli.command()
 @click.argument('input_file', type=click.File('r'))
 def scan(input_file):
-    output_fname = input_file.name.rsplit('/', 1)[-1]
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    output_path = os.path.join(base_dir, 'outputs', f'{output_fname}_{time.time()}.csv')
-    with open(output_path, 'w') as output_file:
-        scanner = Scanner(input_file, output_file)
-        scanner.scan()
+    scanner = Scanner(input_file)
+    scanner.scan()
 
-    click.echo("Program tokens table")
+    click.echo("Analysis table")
+    headers = ['Numline', 'Numchar', 'Char', 'State', 'Token']
+    click.echo(tabulate(scanner.output, headers, 'grid'))
+
+    click.echo("\nProgram tokens table")
     headers = ['Line no', 'Token', 'Id', 'Ident/Const id']
-    rows = [scan_token.to_table_row for scan_token in scanner.scan_tokens]
+    rows = [scan_token.to_table_row() for scan_token in scanner.scan_tokens]
     click.echo(tabulate(rows, headers, 'grid'))
 
     click.echo("\nIdentifiers table")

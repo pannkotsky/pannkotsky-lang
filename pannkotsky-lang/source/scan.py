@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-import csv
-
 from .errors import PKLLexicalError, PKLSemanticError
 from .states import final_state_token_type_map, states_map, UnexpectedTokenError
 from .tokens import tokens_map, tokens_id_map, Token
@@ -29,11 +26,12 @@ class ScanToken:
 
 
 class Scanner:
-    def __init__(self, input_f, output_f):
+    def __init__(self, input_f):
         self.scan_tokens = []
         self.idents_map = {}
         self.constants_map = {}
         self.labels_map = {}
+        self.output = []
 
         self.numline = 1
         self.numchar = 1
@@ -42,10 +40,6 @@ class Scanner:
         self.current_token = ''
 
         self.input_file = input_f
-
-        fieldnames = ['Numline', 'Numchar', 'Char', 'State', 'Token']
-        self.output_writer = csv.DictWriter(output_f, fieldnames)
-        self.output_writer.writeheader()
 
     def scan(self):
         for line in self.input_file:
@@ -76,8 +70,6 @@ class Scanner:
         self.numline += 1
 
     def save_token(self):
-        # TODO: detect redeclaration of variable, undeclared variable
-        # TODO: detect labels
         if not self.current_token.strip(' '):
             return
         token_repr = self.current_token
@@ -90,8 +82,8 @@ class Scanner:
         else:
             token_type = final_state_token_type_map.get(self.current_state.index)
             if token_type == 'Ident':
-                is_var_declared = self.scan_tokens and self.scan_tokens[-1][1] == 'var'
-                is_label_declared = self.scan_tokens and self.scan_tokens[-1][1] == 'label'
+                is_var_declared = self.scan_tokens and self.scan_tokens[-1].token_repr == 'var'
+                is_label_declared = self.scan_tokens and self.scan_tokens[-1].token_repr == 'label'
                 if self.current_token in self.idents_map:
                     if is_var_declared or is_label_declared:
                         raise PKLSemanticError(f'Repeated identifier declaration: {self.current_token}',
@@ -127,10 +119,10 @@ class Scanner:
         ))
 
     def write_output(self):
-        self.output_writer.writerow({
-            'Numline': self.numline,
-            'Numchar': self.numchar,
-            'Char': self.current_char,
-            'State': self.current_state.index,
-            'Token': self.current_token,
-        })
+        self.output.append([
+            self.numline,
+            self.numchar,
+            self.current_char,
+            self.current_state.index,
+            self.current_token,
+        ])
