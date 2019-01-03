@@ -2,9 +2,15 @@
 import click
 from tabulate import tabulate
 
+from source.helpers import (get_language_tokens_table, get_scan_output_table,
+                            get_program_tokens_table, get_idents_table, get_contants_table,
+                            get_labels_table)
 from source.scan import Scanner
 from source.syntax import SyntaxAnalyzer
-from source.tokens import tokens, tokens_map
+
+
+def _print_table(table):
+    click.echo(tabulate(table['rows'], table['headers'], 'grid'))
 
 
 def _scan(input_file):
@@ -12,25 +18,19 @@ def _scan(input_file):
     scanner.scan()
 
     click.echo("Analysis table")
-    headers = ['Numline', 'Numchar', 'Char', 'State', 'Token']
-    click.echo(tabulate(scanner.output, headers, 'grid'))
+    _print_table(get_scan_output_table(scanner))
 
     click.echo("\nProgram tokens table")
-    headers = ['Line no', 'Token', 'Id', 'Ident/Const id']
-    rows = [scan_token.to_table_row() for scan_token in scanner.scan_tokens]
-    click.echo(tabulate(rows, headers, 'grid'))
+    _print_table(get_program_tokens_table(scanner))
 
     click.echo("\nIdentifiers table")
-    headers = ['Ident', 'Id']
-    click.echo(tabulate(scanner.idents_map.items(), headers, 'grid'))
+    _print_table(get_idents_table(scanner))
 
     click.echo("\nConstants table")
-    headers = ['Const', 'Id']
-    click.echo(tabulate(scanner.constants_map.items(), headers, 'grid'))
+    _print_table(get_contants_table(scanner))
 
     click.echo("\nLabels table")
-    headers = ['Label', 'Id']
-    click.echo(tabulate(scanner.labels_map.items(), headers, 'grid'))
+    _print_table(get_labels_table(scanner))
 
     return scanner
 
@@ -42,13 +42,7 @@ def cli():
 
 @cli.command()
 def tokens_list():
-    headers = ['Token', 'Id', 'Description']
-    table = []
-    for token_args in tokens:
-        token = token_args[0]
-        token_obj = tokens_map[token]
-        table.append([token_obj.representation, token_obj.id, token_obj.description])
-    click.echo(tabulate(table, headers, tablefmt='grid'))
+    _print_table(get_language_tokens_table())
 
 
 @cli.command()

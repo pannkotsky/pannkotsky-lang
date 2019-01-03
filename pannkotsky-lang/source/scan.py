@@ -25,7 +25,7 @@ class ScanToken:
         return self.get_token_object().token
 
     def __str__(self):
-        return self.get_token_str()
+        return self.token_repr
 
 
 class Scanner:
@@ -59,7 +59,6 @@ class Scanner:
     def process_line(self, line):
         self.numchar = 0
         while self.numchar < len(line):
-            self.write_output()
             self.numchar += 1
             self.current_char = line[self.numchar - 1]
             self.current_state = self.get_next_state()
@@ -67,6 +66,7 @@ class Scanner:
                 self.current_token += self.current_char
             else:
                 self.numchar -= 1
+            self.write_output()
             if self.current_state.is_final:
                 self.save_token()
                 self.current_token = ''

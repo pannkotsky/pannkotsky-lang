@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>pannkotsky-lang</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/jquery-linedtextarea/jquery-linedtextarea.css" >
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to pannkotsky-lang translator!</h1>
+
+        <div class="content">
+
+            <div class="left">
+                <form method="post">
+                    <label for="program">Enter your program code</label>
+                    <textarea
+                            id="program"
+                            name="program"
+                            rows="20"
+                            cols="100"
+                            autofocus
+                    >{{ program }}</textarea>
+                    <button type="submit">Submit</button>
+                </form>
+
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+
+                {% if syntax_success %}
+                    <p class="success">Syntax check successful</p>
+                {% endif %}
+
+                <div class="left-tables">
+                    <div class="left-left">
+                        {% if program_tokens_table %}
+                            <h3>Program tokens</h3>
+                            {% with table=program_tokens_table %}
+                                {% include 'table.html' %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+
+                    <div class="left-right">
+                        {% if idents_table %}
+                            <h3>Identifiers</h3>
+                            {% with table=idents_table %}
+                                {% include 'table.html' %}
+                            {% endwith %}
+                        {% endif %}
+
+                        {% if contants_table %}
+                            <h3>Constants</h3>
+                            {% with table=contants_table %}
+                                {% include 'table.html' %}
+                            {% endwith %}
+                        {% endif %}
+
+                        {% if labels_table %}
+                            <h3>Labels</h3>
+                            {% with table=labels_table %}
+                                {% include 'table.html' %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="right">
+                <h3>Language tokens</h3>
+                {% with table=tokens_table %}
+                    {% include 'table.html' %}
+                {% endwith %}
+                {% if scan_output_table %}
+                    <h3>Scan output</h3>
+                    {% with table=scan_output_table %}
+                        {% include 'table.html' %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/static/jquery-3.3.1.min.js" ></script>
+    <script src="/static/jquery-linedtextarea/jquery-linedtextarea.js" ></script>
+    <script src="/static/script.js" ></script>
+</body>
+</html>

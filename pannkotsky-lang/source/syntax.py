@@ -22,7 +22,7 @@ class SyntaxAnalyzer:
         total_processed = 0
         while total_processed < len(tokens):
             try:
-                total_processed += self.block(tokens)
+                total_processed += self.block(tokens[total_processed:])
             except NotEnoughTokens:
                 raise PKLSyntaxError('Unexpected end of program', tokens[-1].numline)
 
