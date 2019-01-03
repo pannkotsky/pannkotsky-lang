@@ -1,5 +1,5 @@
 var hello := 16
-var a := 2 + 3
+var a := 2 ^ 3
 print hello - a
 
 label b

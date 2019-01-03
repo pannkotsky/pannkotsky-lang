@@ -7,25 +7,7 @@ from source.syntax import SyntaxAnalyzer
 from source.tokens import tokens, tokens_map
 
 
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
-def tokens_list():
-    headers = ['Token', 'Id', 'Description']
-    table = []
-    for token_args in tokens:
-        token = token_args[0]
-        token_obj = tokens_map[token]
-        table.append([token_obj.representation, token_obj.id, token_obj.description])
-    click.echo(tabulate(table, headers, tablefmt='grid'))
-
-
-@cli.command()
-@click.argument('input_file', type=click.File('r'))
-def scan(input_file):
+def _scan(input_file):
     scanner = Scanner(input_file)
     scanner.scan()
 
@@ -50,12 +32,37 @@ def scan(input_file):
     headers = ['Label', 'Id']
     click.echo(tabulate(scanner.labels_map.items(), headers, 'grid'))
 
+    return scanner
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+def tokens_list():
+    headers = ['Token', 'Id', 'Description']
+    table = []
+    for token_args in tokens:
+        token = token_args[0]
+        token_obj = tokens_map[token]
+        table.append([token_obj.representation, token_obj.id, token_obj.description])
+    click.echo(tabulate(table, headers, tablefmt='grid'))
+
+
+@cli.command()
+@click.argument('input_file', type=click.File('r'))
+def scan(input_file):
+    _scan(input_file)
+
 
 @cli.command()
 @click.argument('input_file', type=click.File('r'))
 def syntax_check(input_file):
-    scanner = Scanner(input_file)
-    scanner.scan()
+    scanner = _scan(input_file)
+
+    click.echo('\n')
 
     syntax_analyzer = SyntaxAnalyzer(scanner.scan_tokens)
     syntax_analyzer.run()
