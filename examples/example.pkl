@@ -1,12 +1,13 @@
 var hello := 16
 var a := 2 + 3
 print hello - a
-print a < hello
-print a >= 5
 
 label b
 var c := 1
 print c
+
 if c < 4
-c := c + 1
-goto b
+    c := c + 1
+    goto b
+
+print 45

@@ -6,7 +6,6 @@ class PKLanguageError(Exception):
         char_text = f', char {char_no}' if char_no else ''
         message = f'{self.__class__.__name__} at line {line_no}{char_text}: {message}'
         self.args = (message,)
-        sys.exit(self)
 
 
 class PKLLexicalError(PKLanguageError):

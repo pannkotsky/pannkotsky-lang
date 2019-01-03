@@ -19,12 +19,12 @@ class SyntaxAnalyzer:
         # no tokens is a valid program
         if not tokens:
             return
-        try:
-            processed = self.block(tokens)
-        except NotEnoughTokens:
-            raise PKLSyntaxError('Unexpected end of program', tokens[-1].numline)
-        if processed < len(tokens):
-            raise PKLSyntaxError('Statements block expected', tokens[processed].numline)
+        total_processed = 0
+        while total_processed < len(tokens):
+            try:
+                total_processed += self.block(tokens)
+            except NotEnoughTokens:
+                raise PKLSyntaxError('Unexpected end of program', tokens[-1].numline)
 
     def check_token(self, tokens: ScanTokens, expected: Iterable[str]):
         if not tokens:
@@ -37,14 +37,18 @@ class SyntaxAnalyzer:
 
     def block(self, tokens: ScanTokens) -> int:
         total_processed = self.statement(tokens)
-        tokens = tokens[total_processed:]
-        while tokens:
+        while total_processed < len(tokens):
+            # empty line separates block
             try:
-                total_processed += self.statement(tokens)
+                self.separator(tokens[total_processed:])
             except PKLSyntaxError:
                 pass
             else:
-                tokens = tokens[total_processed:]
+                return total_processed
+            try:
+                total_processed += self.statement(tokens[total_processed:])
+            except PKLSyntaxError:
+                break
         return total_processed
 
     def statement(self, tokens: ScanTokens) -> int:
@@ -67,11 +71,14 @@ class SyntaxAnalyzer:
         return total_processed
 
     def separator(self, tokens: ScanTokens) -> int:
-        return self.check_token(tokens, '\n')
+        return self.check_token(tokens, ['\n'])
 
     def assignment(self, tokens: ScanTokens) -> int:
         total_processed = 0
-        total_processed += self.check_token(tokens[total_processed:], ['var'])
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['var'])
+        except PKLSyntaxError:
+            pass
         total_processed += self.check_token(tokens[total_processed:], ['_IDENT'])
         total_processed += self.check_token(tokens[total_processed:], [':='])
         total_processed += self.expression(tokens[total_processed:])

@@ -1,7 +1,7 @@
 Program = Block .
-Block = Statement { Statement } .
+Block = Statement { Statement } Separator .
 Statement = { Assignment | Loop | Condition | Goto | Label | Output } Separator .
-Assignment = var Space Ident { Space } ':=' { Space } Expression .
+Assignment = { var Space } Ident { Space } ':=' { Space } Expression .
 Expression = Operand { { Space } Operation { Space } Expression } | '(' Expression ')' .
 Operand = Ident | Number .
 Number = Digit { Digit } .

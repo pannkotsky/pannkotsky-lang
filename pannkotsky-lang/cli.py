@@ -3,6 +3,7 @@ import click
 from tabulate import tabulate
 
 from source.scan import Scanner
+from source.syntax import SyntaxAnalyzer
 from source.tokens import tokens, tokens_map
 
 
@@ -48,6 +49,18 @@ def scan(input_file):
     click.echo("\nLabels table")
     headers = ['Label', 'Id']
     click.echo(tabulate(scanner.labels_map.items(), headers, 'grid'))
+
+
+@cli.command()
+@click.argument('input_file', type=click.File('r'))
+def syntax_check(input_file):
+    scanner = Scanner(input_file)
+    scanner.scan()
+
+    syntax_analyzer = SyntaxAnalyzer(scanner.scan_tokens)
+    syntax_analyzer.run()
+
+    click.echo("Syntax check successful")
 
 
 if __name__ == '__main__':

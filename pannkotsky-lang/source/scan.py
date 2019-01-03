@@ -24,6 +24,9 @@ class ScanToken:
     def get_token_str(self) -> str:
         return self.get_token_object().token
 
+    def __str__(self):
+        return self.get_token_str()
+
 
 class Scanner:
     def __init__(self, input_f):
