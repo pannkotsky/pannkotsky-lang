@@ -52,7 +52,6 @@ class SyntaxAnalyzer:
         return total_processed
 
     def statement(self, tokens: ScanTokens) -> int:
-        total_processed = 0
         for method in [
             self.assignment,
             self.loop,
@@ -61,11 +60,8 @@ class SyntaxAnalyzer:
             self.label,
             self.output
         ]:
-            try:
-                total_processed = method(tokens)
-            except (PKLSyntaxError, NotEnoughTokens):
-                pass
-            else:
+            total_processed = method(tokens)
+            if total_processed > 0:
                 break
         total_processed += self.separator(tokens[total_processed:])
         return total_processed
@@ -75,11 +71,19 @@ class SyntaxAnalyzer:
 
     def assignment(self, tokens: ScanTokens) -> int:
         total_processed = 0
+        var_found = False
         try:
             total_processed += self.check_token(tokens[total_processed:], ['var'])
-        except PKLSyntaxError:
+        except (PKLSyntaxError, NotEnoughTokens):
             pass
-        total_processed += self.check_token(tokens[total_processed:], ['_IDENT'])
+        else:
+            var_found = True
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['_IDENT'])
+        except (PKLSyntaxError, NotEnoughTokens):
+            if var_found:
+                raise
+            return total_processed
         total_processed += self.check_token(tokens[total_processed:], [':='])
         total_processed += self.expression(tokens[total_processed:])
         return total_processed
@@ -113,10 +117,12 @@ class SyntaxAnalyzer:
 
     def loop(self, tokens: ScanTokens) -> int:
         total_processed = 0
-        total_processed += self.check_token(tokens[total_processed:], ['repeat'])
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['repeat'])
+        except (PKLSyntaxError, NotEnoughTokens):
+            return total_processed
         total_processed += self.separator(tokens[total_processed:])
         total_processed += self.block(tokens[total_processed:])
-        total_processed += self.separator(tokens[total_processed:])
         total_processed += self.check_token(tokens[total_processed:], ['until'])
         total_processed += self.logical_expression(tokens[total_processed:])
         return total_processed
@@ -133,7 +139,10 @@ class SyntaxAnalyzer:
 
     def condition(self, tokens: ScanTokens) -> int:
         total_processed = 0
-        total_processed += self.check_token(tokens[total_processed:], ['if'])
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['if'])
+        except (PKLSyntaxError, NotEnoughTokens):
+            return total_processed
         total_processed += self.logical_expression(tokens[total_processed:])
         total_processed += self.separator(tokens[total_processed:])
         total_processed += self.block(tokens[total_processed:])
@@ -141,18 +150,27 @@ class SyntaxAnalyzer:
 
     def goto(self, tokens: ScanTokens) -> int:
         total_processed = 0
-        total_processed += self.check_token(tokens[total_processed:], ['goto'])
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['goto'])
+        except (PKLSyntaxError, NotEnoughTokens):
+            return total_processed
         total_processed += self.check_token(tokens[total_processed:], ['_LABEL'])
         return total_processed
 
     def label(self, tokens: ScanTokens) -> int:
         total_processed = 0
-        total_processed += self.check_token(tokens[total_processed:], ['label'])
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['label'])
+        except (PKLSyntaxError, NotEnoughTokens):
+            return total_processed
         total_processed += self.check_token(tokens[total_processed:], ['_LABEL'])
         return total_processed
 
     def output(self, tokens: ScanTokens) -> int:
         total_processed = 0
-        total_processed += self.check_token(tokens[total_processed:], ['print'])
+        try:
+            total_processed += self.check_token(tokens[total_processed:], ['print'])
+        except (PKLSyntaxError, NotEnoughTokens):
+            return total_processed
         total_processed += self.expression(tokens[total_processed:])
         return total_processed

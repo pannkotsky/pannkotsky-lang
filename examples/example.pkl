@@ -11,3 +11,13 @@ if c < 4
     goto b
 
 print 45
+
+var d := 1
+
+repeat
+    d := d + 1
+    print d
+    if c < 10
+        c := c + 2
+
+until d < 4
