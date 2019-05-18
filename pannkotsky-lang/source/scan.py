@@ -1,31 +1,6 @@
 from .errors import PKLLexicalError, PKLSemanticError
 from .states import final_state_token_type_map, states_map, UnexpectedTokenError
-from .tokens import tokens_map, tokens_id_map, Token
-
-
-class ScanToken:
-    def __init__(self, numline: int, token_repr: str, token_id: int, ident_id: int):
-        self.numline = numline
-        self.token_repr = token_repr
-        self.token_id = token_id
-        self.ident_id = ident_id
-
-    def to_table_row(self):
-        return (
-            self.numline,
-            self.token_repr,
-            self.token_id,
-            self.ident_id
-        )
-
-    def get_token_object(self) -> Token:
-        return tokens_id_map.get(self.token_id)
-
-    def get_token_str(self) -> str:
-        return self.get_token_object().token
-
-    def __str__(self):
-        return self.token_repr
+from .tokens import tokens_map, ScanToken
 
 
 class Scanner:
@@ -77,6 +52,7 @@ class Scanner:
             return
         token_repr = self.current_token
         token_id = None
+        # TODO: fix to use None
         ident_const_id = ''
         if self.current_token in tokens_map:
             token_obj = tokens_map[self.current_token]

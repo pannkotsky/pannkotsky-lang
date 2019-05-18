@@ -1,7 +1,7 @@
 from typing import Iterable, List
 
 from .errors import PKLSyntaxError
-from .scan import ScanToken
+from .tokens import ScanToken
 
 ScanTokens = List[ScanToken]
 
@@ -12,10 +12,11 @@ class NotEnoughTokens(Exception):
 
 class SyntaxAnalyzer:
     def __init__(self, tokens: ScanTokens):
-        self.tokens = tokens
+        self.input_tokens = tokens
+        self.output_tokens = []
 
     def run(self):
-        tokens = self.tokens
+        tokens = self.input_tokens
         # no tokens is a valid program
         if not tokens:
             return

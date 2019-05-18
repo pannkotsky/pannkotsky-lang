@@ -23,6 +23,7 @@ tokens = [
     ('<=', 'less than or equal to'),
     ('>=', 'more than or equal to'),
     ('==', 'equal to'),
+    ('!=', 'not equal to'),
     ('var', 'variable declaration'),
     ('\n', 'newline', '\\n'),
     ('repeat', 'loop operators block start'),
@@ -44,56 +45,26 @@ for index, args in enumerate(tokens):
     tokens_map[args[0]] = token
 
 
-"""
-+---------+------+----------------------------+
-| Token   |   Id | Description                |
-+=========+======+============================+
-| :=      |    0 | assignment                 |
-+---------+------+----------------------------+
-| +       |    1 | addition                   |
-+---------+------+----------------------------+
-| -       |    2 | subtraction                |
-+---------+------+----------------------------+
-| *       |    3 | multiplication             |
-+---------+------+----------------------------+
-| /       |    4 | division                   |
-+---------+------+----------------------------+
-| ^       |    5 | power                      |
-+---------+------+----------------------------+
-| (       |    6 | opening bracket            |
-+---------+------+----------------------------+
-| )       |    7 | closing bracket            |
-+---------+------+----------------------------+
-| <       |    8 | less than                  |
-+---------+------+----------------------------+
-| >       |    9 | more than                  |
-+---------+------+----------------------------+
-| <=      |   10 | less than or equal to      |
-+---------+------+----------------------------+
-| >=      |   11 | more than or equal to      |
-+---------+------+----------------------------+
-| ==      |   12 | equal to                   |
-+---------+------+----------------------------+
-| var     |   13 | variable declaration       |
-+---------+------+----------------------------+
-| \n      |   14 | newline                    |
-+---------+------+----------------------------+
-| repeat  |   15 | loop operators block start |
-+---------+------+----------------------------+
-| until   |   16 | loop condition start       |
-+---------+------+----------------------------+
-| if      |   17 | condition start            |
-+---------+------+----------------------------+
-| goto    |   18 | goto statement             |
-+---------+------+----------------------------+
-| label   |   19 | label declaration          |
-+---------+------+----------------------------+
-| print   |   20 | output operator            |
-+---------+------+----------------------------+
-| _IDENT  |   21 | ident                      |
-+---------+------+----------------------------+
-| _CONST  |   22 | const                      |
-+---------+------+----------------------------+
-| _LABEL  |   23 | label                      |
-+---------+------+----------------------------+
-"""
+class ScanToken:
+    def __init__(self, numline: int, token_repr: str, token_id: int, ident_id: int):
+        self.numline = numline
+        self.token_repr = token_repr
+        self.token_id = token_id
+        self.ident_id = ident_id
+
+    def to_table_row(self):
+        return (
+            self.numline,
+            self.token_repr,
+            self.token_id,
+            self.ident_id
+        )
+
+    def get_token_object(self) -> Token:
+        return tokens_id_map.get(self.token_id)
+
+    def get_token_str(self) -> str:
+        return self.get_token_object().token
+
+    def __str__(self):
+        return self.token_repr
