@@ -28,14 +28,9 @@ class Executor:
     }
 
     def __init__(self, tokens: List[str]):
-        self._tokens = self._prepare(tokens)
-        self._indexes_list = sorted(self._tokens.keys())
-        self._current_token_index = self._indexes_list[0]
+        self._tokens = tokens
+        self._current_token_index = 0
         self._idents_registry = {}
-
-    @property
-    def tokens(self):
-        return self._tokens
 
     def execute(self):
         execution_stack = []
@@ -43,7 +38,7 @@ class Executor:
         while True:
             try:
                 token = self._tokens[self._current_token_index]
-            except KeyError:
+            except IndexError:
                 break
             execution_stack.append(token)
 
@@ -60,30 +55,7 @@ class Executor:
                 if res is not None:
                     execution_stack.append(res)
 
-            try:
-                self._current_token_index = self._get_next_index()
-            except IndexError:
-                break
-
-    @staticmethod
-    def _prepare(tokens: List[str]):
-        """ Create dict instead of list, replace labels with tokens address. """
-
-        tokens_with_indexes = list(zip(range(len(tokens)), tokens))
-        tokens_map = dict(tokens_with_indexes)
-        labels_map = {}
-        for index, token in tokens_with_indexes:
-            if token == 'label':
-                assert tokens[index - 1].startswith('_label_')
-                labels_map[tokens[index - 1]] = index + 1
-                del tokens_map[index]
-                del tokens_map[index - 1]
-
-        for index, token in tokens_map.items():
-            if token.startswith('_label_'):
-                tokens_map[index] = labels_map[token]
-
-        return tokens_map
+            self._current_token_index += 1
 
     def _get_operation(self, execution_stack: List):
         """ Returns method by operation name and args it requires. """
@@ -114,17 +86,13 @@ class Executor:
         # if we support more types in future, add type autodetection
         return int(value)
 
-    def _get_next_index(self):
-        return self._indexes_list[self._indexes_list.index(self._current_token_index) + 1]
-
     ############### Operations ###############
 
-    def _goto(self, token_index: int):
-        assert isinstance(token_index, int)
-        self._current_token_index = token_index
+    def _goto(self, token_index: str):
+        self._current_token_index = self._cast_value(token_index, int)
         raise Jump
 
-    def _goto_if_not(self, condition: bool, token_index: int):
+    def _goto_if_not(self, condition: bool, token_index: str):
         assert isinstance(condition, bool)
         if not condition:
             self._goto(token_index)
