@@ -1,20 +1,8 @@
-# TODO: rewrite this file so it assumes a flat list of tokens from RPNBuilder
-
 from inspect import getfullargspec
 from typing import List
 
-from .tokens import ScanToken
 
-ScanTokens = List[ScanToken]
-
-
-class ExpressionTermination(Exception):
-    """ Expression is terminated on goto instruction. """
-    pass
-
-
-class BlockTermination(Exception):
-    """ This means there are no more expressions to process or goto led to not existing label. """
+class Jump(Exception):
     pass
 
 
@@ -36,150 +24,147 @@ class Executor:
         'print': '_print',
         'label': '_declare_label',
         'goto': '_goto',
+        'goto_if_not': '_goto_if_not',
     }
 
-    def __init__(self, expressions, parent=None):
-        self.expressions = expressions
-        self.parent = parent
+    def __init__(self, tokens: List[str]):
+        self.tokens = self.prepare(tokens)
+        self.indexes_list = sorted(self.tokens.keys())
+        self.current_token_index = self.indexes_list[0]
         self.idents_registry = {}
-        self.labels_registry = {}
-        self.current_expr_index = 0
+
+    @staticmethod
+    def prepare(tokens: List[str]):
+        """ Create dict instead of list, replace labels with tokens address. """
+
+        tokens_with_indexes = list(zip(range(len(tokens)), tokens))
+        tokens_map = dict(tokens_with_indexes)
+        labels_map = {}
+        for index, token in tokens_with_indexes:
+            if token == 'label':
+                assert tokens[index - 1].startswith('_label_')
+                labels_map[tokens[index - 1]] = index + 1
+                del tokens_map[index]
+                del tokens_map[index - 1]
+
+        for index, token in tokens_map.items():
+            if token.startswith('_label_'):
+                tokens_map[index] = labels_map[token]
+
+        return tokens_map
 
     def execute(self):
-        while True:
-            try:
-                self.execute_expression()
-            except ExpressionTermination:
-                continue
-            except BlockTermination:
-                break
-            else:
-                self.next()
-
-    def execute_expression(self):
-        expression = self.current_expression()
-
-        if not expression:
-            return
-
         execution_stack = []
 
-        for token in expression:
-            if isinstance(token, list):
-                executor = Executor(token, parent=self)
-                executor.execute()
-                continue
-
+        while True:
+            try:
+                token = self.tokens[self.current_token_index]
+            except KeyError:
+                break
             execution_stack.append(token)
 
-            # go to the next token in case of operand
-            if token not in self.OPERATIONS_MAP:
-                continue
+            if token in self.OPERATIONS_MAP:
+                # in case of operation extract the amount of arguments it requires
+                # and perform operation
+                operation, args = self.get_operation(execution_stack)
+                try:
+                    res = operation(*args)
+                except Jump:
+                    continue
 
-            # in case of operation extract the amount of arguments it requires and perform
-            operation, args = self.get_operation(execution_stack)
-            res = operation(*args)
+                # if operation returns some result put it back to stack
+                if res is not None:
+                    execution_stack.append(res)
 
-            # if operation returns some result put it back to stack
-            if res is not None:
-                execution_stack.append(res)
+            try:
+                self.current_token_index = self.get_next_index()
+            except IndexError:
+                break
 
-    def get_operation(self, execution_stack: ScanTokens):
+    def get_operation(self, execution_stack: List):
         """ Returns method by operation name and args it requires. """
-        operation_name = self.OPERATIONS_MAP[execution_stack.pop().token_repr]
+
+        operation_name = self.OPERATIONS_MAP[execution_stack.pop()]
         operation = getattr(self, operation_name)
         signature = getfullargspec(operation)
-        numargs = len(signature['args']) - 1  # exclude 'self' arg
+        numargs = len(signature.args) - 1  # exclude 'self' arg
+
+        assert len(execution_stack) >= numargs
+
         args = []
         for _ in range(numargs):
             args = [execution_stack.pop()] + args
 
-        args = [self.get_value(arg) for arg in args]
-
         return operation, args
 
-    def get_value(self, ident: ScanToken):
-        token = ident.get_token_str()
+    def get_value(self, arg, target_type=None):
+        if arg in self.idents_registry:
+            return self.idents_registry[arg]
+        return self.cast_value(arg, target_type)
 
-        if token == '_IDENT':
-            return self.get_ident_value(ident.token_repr)
+    @staticmethod
+    def cast_value(value, target_type=None):
+        if target_type is not None:
+            return target_type(value)
 
-        if token == '_LABEL':
-            return self.get_label_value(ident.token_repr)
+        # if we support more types in future, add type autodetection
+        return int(value)
 
-        return ident.token_repr
-
-    def current_expression(self):
-        try:
-            return self.expressions[self.current_expr_index]
-        except IndexError:
-            raise BlockTermination
-
-    def next(self):
-        self.current_expr_index += 1
-
-    def get_ident_value(self, ident: str):
-        try:
-            return self.idents_registry[ident]
-        except KeyError:
-            # there must be parent with the ident
-            assert self.parent is not None
-            return self.parent.get_ident_value(ident)
-
-    def get_label_value(self, label: str):
-        return self.labels_registry[label]
+    def get_next_index(self):
+        return self.indexes_list[self.indexes_list.index(self.current_token_index) + 1]
 
     ############### Operations ###############
 
-    def _goto(self, expr_index: int):
-        self.current_expr_index = expr_index
-        raise ExpressionTermination
+    def _goto(self, token_index: int):
+        assert isinstance(token_index, int)
+        self.current_token_index = token_index
+        raise Jump
 
-    def _goto_if_not(self, label: str, condition: bool):
+    def _goto_if_not(self, condition: bool, token_index: int):
+        assert isinstance(condition, bool)
         if not condition:
-            self._goto(label)
+            self._goto(token_index)
 
-    def _declare_ident(self, ident: str):
+    def _declare_ident(self, ident: str) -> str:
         self.idents_registry[ident] = None
+        return ident
 
-    def _assign(self, ident: str, value):
-        self.idents_registry[ident] = value
-
-    def _declare_label(self, label: str):
-        self.labels_registry[label] = self.current_expr_index + 1
+    def _assign(self, ident: str, value) -> str:
+        self.idents_registry[ident] = self.get_value(value)
+        return ident
 
     def _print(self, arg):
-        print(arg)
+        print(self.get_value(arg))
 
-    def _add(self, value1, value2):
-        return value1 + value2
+    def _add(self, v1, v2):
+        return self.get_value(v1, int) + self.get_value(v2, int)
 
-    def _subtract(self, value1, value2):
-        return value1 - value2
+    def _subtract(self, v1, v2):
+        return self.get_value(v1, int) - self.get_value(v2, int)
 
-    def _multiply(self, value1, value2):
-        return value1 * value2
+    def _multiply(self, v1, v2):
+        return self.get_value(v1, int) * self.get_value(v2, int)
 
-    def _divide(self, value1, value2):
-        return value1 / value2
+    def _divide(self, v1, v2):
+        return self.get_value(v1, int) // self.get_value(v2, int)
 
     def _to_power(self, value, power):
-        return value ** power
+        return self.get_value(value, int) ** self.get_value(power)
 
-    def _lt(self, value1, value2):
-        return value1 < value2
+    def _lt(self, v1, v2) -> bool:
+        return self.get_value(v1, int) < self.get_value(v2, int)
 
-    def _lte(self, value1, value2):
-        return value1 <= value2
+    def _lte(self, v1, v2) -> bool:
+        return self.get_value(v1, int) <= self.get_value(v2, int)
 
-    def _gt(self, value1, value2):
-        return value1 > value2
+    def _gt(self, v1, v2) -> bool:
+        return self.get_value(v1, int) > self.get_value(v2, int)
 
-    def _gte(self, value1, value2):
-        return value1 >= value2
+    def _gte(self, v1, v2) -> bool:
+        return self.get_value(v1, int) >= self.get_value(v2, int)
 
-    def _eq(self, value1, value2):
-        return value1 == value2
+    def _eq(self, v1, v2) -> bool:
+        return self.get_value(v1, int) == self.get_value(v2, int)
 
-    def _ne(self, value1, value2):
-        return value1 != value2
+    def _ne(self, v1, v2) -> bool:
+        return self.get_value(v1, int) != self.get_value(v2, int)
