@@ -28,13 +28,45 @@ class Executor:
     }
 
     def __init__(self, tokens: List[str]):
-        self.tokens = self.prepare(tokens)
-        self.indexes_list = sorted(self.tokens.keys())
-        self.current_token_index = self.indexes_list[0]
-        self.idents_registry = {}
+        self._tokens = self._prepare(tokens)
+        self._indexes_list = sorted(self._tokens.keys())
+        self._current_token_index = self._indexes_list[0]
+        self._idents_registry = {}
+
+    @property
+    def tokens(self):
+        return self._tokens
+
+    def execute(self):
+        execution_stack = []
+
+        while True:
+            try:
+                token = self._tokens[self._current_token_index]
+            except KeyError:
+                break
+            execution_stack.append(token)
+
+            if token in self.OPERATIONS_MAP:
+                # in case of operation extract the amount of arguments it requires
+                # and perform operation
+                operation, args = self._get_operation(execution_stack)
+                try:
+                    res = operation(*args)
+                except Jump:
+                    continue
+
+                # if operation returns some result put it back to stack
+                if res is not None:
+                    execution_stack.append(res)
+
+            try:
+                self._current_token_index = self._get_next_index()
+            except IndexError:
+                break
 
     @staticmethod
-    def prepare(tokens: List[str]):
+    def _prepare(tokens: List[str]):
         """ Create dict instead of list, replace labels with tokens address. """
 
         tokens_with_indexes = list(zip(range(len(tokens)), tokens))
@@ -53,35 +85,7 @@ class Executor:
 
         return tokens_map
 
-    def execute(self):
-        execution_stack = []
-
-        while True:
-            try:
-                token = self.tokens[self.current_token_index]
-            except KeyError:
-                break
-            execution_stack.append(token)
-
-            if token in self.OPERATIONS_MAP:
-                # in case of operation extract the amount of arguments it requires
-                # and perform operation
-                operation, args = self.get_operation(execution_stack)
-                try:
-                    res = operation(*args)
-                except Jump:
-                    continue
-
-                # if operation returns some result put it back to stack
-                if res is not None:
-                    execution_stack.append(res)
-
-            try:
-                self.current_token_index = self.get_next_index()
-            except IndexError:
-                break
-
-    def get_operation(self, execution_stack: List):
+    def _get_operation(self, execution_stack: List):
         """ Returns method by operation name and args it requires. """
 
         operation_name = self.OPERATIONS_MAP[execution_stack.pop()]
@@ -97,27 +101,27 @@ class Executor:
 
         return operation, args
 
-    def get_value(self, arg, target_type=None):
-        if arg in self.idents_registry:
-            return self.idents_registry[arg]
-        return self.cast_value(arg, target_type)
+    def _get_value(self, arg, target_type=None):
+        if arg in self._idents_registry:
+            return self._idents_registry[arg]
+        return self._cast_value(arg, target_type)
 
     @staticmethod
-    def cast_value(value, target_type=None):
+    def _cast_value(value, target_type=None):
         if target_type is not None:
             return target_type(value)
 
         # if we support more types in future, add type autodetection
         return int(value)
 
-    def get_next_index(self):
-        return self.indexes_list[self.indexes_list.index(self.current_token_index) + 1]
+    def _get_next_index(self):
+        return self._indexes_list[self._indexes_list.index(self._current_token_index) + 1]
 
     ############### Operations ###############
 
     def _goto(self, token_index: int):
         assert isinstance(token_index, int)
-        self.current_token_index = token_index
+        self._current_token_index = token_index
         raise Jump
 
     def _goto_if_not(self, condition: bool, token_index: int):
@@ -126,45 +130,45 @@ class Executor:
             self._goto(token_index)
 
     def _declare_ident(self, ident: str) -> str:
-        self.idents_registry[ident] = None
+        self._idents_registry[ident] = None
         return ident
 
     def _assign(self, ident: str, value) -> str:
-        self.idents_registry[ident] = self.get_value(value)
+        self._idents_registry[ident] = self._get_value(value)
         return ident
 
     def _print(self, arg):
-        print(self.get_value(arg))
+        print(self._get_value(arg))
 
     def _add(self, v1, v2):
-        return self.get_value(v1, int) + self.get_value(v2, int)
+        return self._get_value(v1, int) + self._get_value(v2, int)
 
     def _subtract(self, v1, v2):
-        return self.get_value(v1, int) - self.get_value(v2, int)
+        return self._get_value(v1, int) - self._get_value(v2, int)
 
     def _multiply(self, v1, v2):
-        return self.get_value(v1, int) * self.get_value(v2, int)
+        return self._get_value(v1, int) * self._get_value(v2, int)
 
     def _divide(self, v1, v2):
-        return self.get_value(v1, int) // self.get_value(v2, int)
+        return self._get_value(v1, int) // self._get_value(v2, int)
 
     def _to_power(self, value, power):
-        return self.get_value(value, int) ** self.get_value(power)
+        return self._get_value(value, int) ** self._get_value(power)
 
     def _lt(self, v1, v2) -> bool:
-        return self.get_value(v1, int) < self.get_value(v2, int)
+        return self._get_value(v1, int) < self._get_value(v2, int)
 
     def _lte(self, v1, v2) -> bool:
-        return self.get_value(v1, int) <= self.get_value(v2, int)
+        return self._get_value(v1, int) <= self._get_value(v2, int)
 
     def _gt(self, v1, v2) -> bool:
-        return self.get_value(v1, int) > self.get_value(v2, int)
+        return self._get_value(v1, int) > self._get_value(v2, int)
 
     def _gte(self, v1, v2) -> bool:
-        return self.get_value(v1, int) >= self.get_value(v2, int)
+        return self._get_value(v1, int) >= self._get_value(v2, int)
 
     def _eq(self, v1, v2) -> bool:
-        return self.get_value(v1, int) == self.get_value(v2, int)
+        return self._get_value(v1, int) == self._get_value(v2, int)
 
     def _ne(self, v1, v2) -> bool:
-        return self.get_value(v1, int) != self.get_value(v2, int)
+        return self._get_value(v1, int) != self._get_value(v2, int)
