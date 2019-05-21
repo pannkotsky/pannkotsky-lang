@@ -12,11 +12,10 @@ class NotEnoughTokens(Exception):
 
 class SyntaxAnalyzer:
     def __init__(self, tokens: ScanTokens):
-        self.input_tokens = tokens
-        self.output_tokens = []
+        self._input_tokens = tokens
 
     def run(self):
-        tokens = self.input_tokens
+        tokens = self._input_tokens
         # no tokens is a valid program
         if not tokens:
             return
@@ -26,6 +25,7 @@ class SyntaxAnalyzer:
                 total_processed += self.block(tokens[total_processed:])
             except NotEnoughTokens:
                 raise PKLSyntaxError('Unexpected end of program', tokens[-1].numline)
+        return [token.token_repr for token in tokens]
 
     def check_token(self, tokens: ScanTokens, expected: Iterable[str]):
         if not tokens:

@@ -35,20 +35,20 @@ class RPNTestCase(TestCase):
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
     def test_endlines(self):
-        tokens = 'var a := b + c \n a := d'.split(' ')
+        tokens = 'var a := b + c \\n a := d'.split(' ')
         expected_output = 'a var b c + := a d :='.split()
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
     def test_if(self):
-        tokens = 'if a > b \n a := 5 \n b := 6 \n \n print b'.split(' ')
+        tokens = 'if a > b \\n a := 5 \\n b := 6 \\n \\n print b'.split(' ')
         expected_output = 'a b > 11 goto_if_not a 5 := b 6 := b print'.split()
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
     def test_nested_if(self):
-        tokens = ('if a > b \n '
-                  'a := 5 \n '
-                  'if b < 3 \n '
-                  'b := 6 \n \n \n '
+        tokens = ('if a > b \\n '
+                  'a := 5 \\n '
+                  'if b < 3 \\n '
+                  'b := 6 \\n \\n \\n '
                   'print b').split(' ')
         expected_output = ('a b > 16 goto_if_not '
                            'a 5 := '
@@ -58,11 +58,11 @@ class RPNTestCase(TestCase):
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
     def test_nested_if_2(self):
-        tokens = ('if a > b \n '
-                  'a := 5 \n '
-                  'if b < 3 \n '
-                  'b := 6 \n \n '
-                  'print a \n \n '
+        tokens = ('if a > b \\n '
+                  'a := 5 \\n '
+                  'if b < 3 \\n '
+                  'b := 6 \\n \\n '
+                  'print a \\n \\n '
                   'print b').split(' ')
         expected_output = ('a b > 18 goto_if_not '
                            'a 5 := '

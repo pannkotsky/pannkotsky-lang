@@ -1,6 +1,3 @@
-import sys
-
-
 class PKLanguageError(Exception):
     def __init__(self, message: str, line_no: int, char_no: int=None):
         char_text = f', char {char_no}' if char_no else ''

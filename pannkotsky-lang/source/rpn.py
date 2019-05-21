@@ -25,9 +25,10 @@ class RPNBuilder:
         '(': 0,
         'if': 0,
         ')': 1,
-        '\n': 1,
+        '\\n': 1,
         'print': 2,
         'goto': 2,
+        'label': 2,
         ':=': 2,
         'var': 3,
         '<': 4,
@@ -65,9 +66,9 @@ class RPNBuilder:
                 self._to_stack(token)
                 continue
 
-            if token == '\n' and self._stack[-1] == '\n' and 'if' in self._stack:
-                # double '\n' acts as end of 'if' operation
-                assert self._stack.pop() == '\n'
+            if token == '\\n' and self._stack[-1] == '\\n' and 'if' in self._stack:
+                # double '\\n' acts as end of 'if' operation
+                assert self._stack.pop() == '\\n'
                 while self._stack and self._stack[-1] != 'if':
                     assert self._stack[-1].startswith('_label_')
                     self._output.append(self._stack.pop())
@@ -91,12 +92,12 @@ class RPNBuilder:
         return self._replace_labels(self._output)
 
     def _to_stack(self, token: str):
-        if self._stack and self._stack[-1] == '\n':
+        if self._stack and self._stack[-1] == '\\n':
             self._stack.pop()
 
-        if token == '\n' and self._stack:
+        if token == '\\n' and self._stack:
             if self._stack[-1] == 'if':
-                # '\n' acts as 'then' in this case
+                # '\\n' acts as 'then' in this case
                 label = generate_label_name()
                 self._stack.append(label)
                 self._output.append(label)
@@ -115,7 +116,7 @@ class RPNBuilder:
         assert stack_token not in ['(', 'if']
         assert not stack_token.startswith('_label_')
 
-        if stack_token != '\n':
+        if stack_token != '\\n':
             self._output.append(stack_token)
 
     @staticmethod
@@ -127,8 +128,6 @@ class RPNBuilder:
         labels_map = {}
         for index, token in tokens_with_indexes[::-1]:
             if token == 'label':
-                assert tokens[index - 1].startswith('_label_')
-
                 labels_map[tokens[index - 1]] = _get_next_index(index, tokens_map)
                 del tokens_map[index]
                 del tokens_map[index - 1]
@@ -138,7 +137,7 @@ class RPNBuilder:
             labels_map[label] = str(indexes_list.index(value))
 
         for index, token in tokens_map.items():
-            if token.startswith('_label_'):
+            if token in labels_map:
                 tokens_map[index] = labels_map[token]
 
         return [tokens_map[index] for index in indexes_list]

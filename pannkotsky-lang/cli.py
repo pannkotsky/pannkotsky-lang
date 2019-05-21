@@ -5,8 +5,11 @@ from tabulate import tabulate
 from source.helpers import (get_language_tokens_table, get_scan_output_table,
                             get_program_tokens_table, get_idents_table, get_contants_table,
                             get_labels_table)
+from source.errors import PKLanguageError
 from source.scan import Scanner
 from source.syntax import SyntaxAnalyzer
+from source.rpn import RPNBuilder
+from source.exec import Executor
 
 
 def _print_table(table):
@@ -15,7 +18,13 @@ def _print_table(table):
 
 def _scan(input_file):
     scanner = Scanner(input_file)
-    scanner.scan()
+
+    try:
+        tokens = scanner.scan()
+    except PKLanguageError as e:
+        click.echo(str(e))
+        exit(1)
+        return
 
     click.echo("Analysis table")
     _print_table(get_scan_output_table(scanner))
@@ -32,7 +41,48 @@ def _scan(input_file):
     click.echo("\nLabels table")
     _print_table(get_labels_table(scanner))
 
-    return scanner
+    return tokens
+
+
+def _syntax_check(input_file):
+    scan_tokens = _scan(input_file)
+
+    click.echo('\n')
+
+    try:
+        syntax_tokens = SyntaxAnalyzer(scan_tokens).run()
+    except PKLanguageError as e:
+        click.echo(str(e))
+        exit(1)
+        return
+
+    click.echo("Syntax check successful")
+
+    return syntax_tokens
+
+
+def _rpn(input_file):
+    syntax_tokens = _syntax_check(input_file)
+    click.echo('\n')
+
+    rpn_builder = RPNBuilder(syntax_tokens)
+    rpn_tokens = rpn_builder.build()
+
+    click.echo('RPN table')
+    click.echo(rpn_tokens)
+
+    return rpn_tokens
+
+
+def _execute(input_file):
+    rpn_tokens = _rpn(input_file)
+
+    executor = Executor(rpn_tokens)
+
+    click.echo('\n')
+    click.echo('Executor output')
+
+    executor.execute()
 
 
 @click.group()
@@ -54,14 +104,19 @@ def scan(input_file):
 @cli.command()
 @click.argument('input_file', type=click.File('r'))
 def syntax_check(input_file):
-    scanner = _scan(input_file)
+    _syntax_check(input_file)
 
-    click.echo('\n')
 
-    syntax_analyzer = SyntaxAnalyzer(scanner.scan_tokens)
-    syntax_analyzer.run()
+@cli.command()
+@click.argument('input_file', type=click.File('r'))
+def rpn(input_file):
+    _rpn(input_file)
 
-    click.echo("Syntax check successful")
+
+@cli.command()
+@click.argument('input_file', type=click.File('r'))
+def execute(input_file):
+    _execute(input_file)
 
 
 if __name__ == '__main__':

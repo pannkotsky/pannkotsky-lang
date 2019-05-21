@@ -2,22 +2,24 @@ var hello := 16
 var a := 2 ^ 3
 print hello - a
 
-label b
 var c := 1
-print c
 
+label b
+print c
 if c < 4
     c := c + 1
     goto b
 
 print 45
 
-var d := 1
+var d := c * 5 / (a - 5)
+print d
 
 repeat
     d := d + 1
     print d
     if c < 10
         c := c + 2
+    print c
 
-until d < 4
+until d < 14

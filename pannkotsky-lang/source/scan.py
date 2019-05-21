@@ -22,6 +22,7 @@ class Scanner:
     def scan(self):
         for line in self.input_file:
             self.process_line(line)
+        return self.scan_tokens
 
     def get_next_state(self):
         try:
