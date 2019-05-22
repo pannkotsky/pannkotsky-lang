@@ -35,12 +35,12 @@ class RPNTestCase(TestCase):
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
     def test_endlines(self):
-        tokens = 'var a := b + c \\n a := d'.split(' ')
+        tokens = 'var a := b + c \\n a := d'.split()
         expected_output = 'a var b c + := a d :='.split()
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
     def test_if(self):
-        tokens = 'if a > b \\n a := 5 \\n b := 6 \\n \\n print b'.split(' ')
+        tokens = 'if a > b \\n a := 5 \\n b := 6 \\n \\n print b'.split()
         expected_output = 'a b > 11 goto_if_not a 5 := b 6 := b print'.split()
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)
 
@@ -49,7 +49,7 @@ class RPNTestCase(TestCase):
                   'a := 5 \\n '
                   'if b < 3 \\n '
                   'b := 6 \\n \\n \\n '
-                  'print b').split(' ')
+                  'print b').split()
         expected_output = ('a b > 16 goto_if_not '
                            'a 5 := '
                            'b 3 < 16 goto_if_not '
@@ -70,4 +70,18 @@ class RPNTestCase(TestCase):
                            'b 6 := '
                            'a print '
                            'b print').split()
+        self.assertEqual(RPNBuilder(tokens).build(), expected_output)
+
+    def test_repeat_until(self):
+        tokens = ('var a := 1 \\n '
+                  'var b := 10 \\n '
+                  'repeat \\n '
+                  'a := a + 1 \\n '
+                  'b := b - 2 \\n \\n '
+                  'until a > b \\n \\n').split()
+        expected_output = ('a var 1 := '
+                           'b var 10 := '
+                           'a a 1 + := '
+                           'b b 2 - := '
+                           ' a b > 8 goto_if_not').split()
         self.assertEqual(RPNBuilder(tokens).build(), expected_output)

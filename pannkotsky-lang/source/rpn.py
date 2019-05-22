@@ -24,7 +24,9 @@ class RPNBuilder:
     _PRIORITIES = {
         '(': 0,
         'if': 0,
+        'repeat': 0,
         ')': 1,
+        'until': 1,
         '\\n': 1,
         'print': 2,
         'goto': 2,
@@ -77,6 +79,17 @@ class RPNBuilder:
                 self._to_stack(token)
                 continue
 
+            if token == '\\n' and 'until' in self._stack:
+                while self._stack[-1] != 'until':
+                    self._output.append(self._stack.pop())
+                assert self._stack.pop() == 'until'
+                assert self._stack[-1].startswith('_label_')
+                self._output.append(self._stack.pop())
+                assert self._stack.pop() == 'repeat'
+                self._output.append('goto_if_not')
+                self._to_stack(token)
+                continue
+
             # the only thing which can be in stack and not in self._PRIORITIES is label
             # giving it priority -1 (it can be pushed out of stack by special case only)
             while self._stack and self._PRIORITIES.get(self._stack[-1], -1) >= priority:
@@ -95,7 +108,14 @@ class RPNBuilder:
         if self._stack and self._stack[-1] == '\\n':
             self._stack.pop()
 
-        if token == '\\n' and self._stack:
+        if token == 'repeat':
+            label = generate_label_name()
+            self._stack.append(token)
+            self._stack.append(label)
+            self._output.append(label)
+            self._output.append('label')
+
+        elif token == '\\n' and self._stack:
             if self._stack[-1] == 'if':
                 # '\\n' acts as 'then' in this case
                 label = generate_label_name()

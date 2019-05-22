@@ -18,8 +18,8 @@ print d
 repeat
     d := d + 1
     print d
-    if c < 10
+    if c < 8
         c := c + 2
-    print c
+        print c
 
-until d < 14
+until d > 14
