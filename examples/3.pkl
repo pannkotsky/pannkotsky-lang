@@ -1,0 +1,23 @@
+var hello := 16
+var a := 2 ^ 3
+print hello - a
+
+var c := 1
+print c
+
+label b
+if c < 4
+    c := c + 1
+    goto b
+
+print 45
+
+var d := 1
+
+repeat
+    d := d + 1
+    print d
+    if c < 10
+        c := c + 2
+
+until d > 4
