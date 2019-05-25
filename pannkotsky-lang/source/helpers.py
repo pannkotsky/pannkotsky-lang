@@ -1,4 +1,5 @@
 from .alphabet import ALPHABET, LETTERS, DIGITS
+from .rpn import RPNBuilder
 from .scan import Scanner
 from .tokens import tokens, tokens_map
 
@@ -62,4 +63,11 @@ def get_labels_table(scanner: Scanner):
     return {
         'headers': ['Label', 'Id'],
         'rows': scanner.labels_map.items(),
+    }
+
+
+def get_rpn_table(rpn_builder: RPNBuilder):
+    return {
+        'headers': ['Input symbol', 'Stack', 'Output'],
+        'rows': rpn_builder.rpn_steps
     }

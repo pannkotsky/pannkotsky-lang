@@ -94,13 +94,10 @@ class SyntaxAnalyzer:
         try:
             total_processed += self.check_token(tokens, ['('])
         except PKLSyntaxError:
-            pass
+            total_processed += self.operand(tokens[total_processed:])
         else:
             total_processed += self.expression(tokens[total_processed:])
             total_processed += self.check_token(tokens[total_processed:], [')'])
-            return total_processed
-
-        total_processed += self.operand(tokens[total_processed:])
 
         try:
             total_processed += self.operation(tokens[total_processed:])

@@ -4,7 +4,7 @@ from tabulate import tabulate
 
 from source.helpers import (get_language_tokens_table, get_scan_output_table,
                             get_program_tokens_table, get_idents_table, get_contants_table,
-                            get_labels_table)
+                            get_labels_table, get_rpn_table)
 from source.errors import PKLanguageError
 from source.scan import Scanner
 from source.syntax import SyntaxAnalyzer
@@ -63,12 +63,14 @@ def _syntax_check(input_file):
 
 def _rpn(input_file):
     syntax_tokens = _syntax_check(input_file)
-    click.echo('\n')
 
     rpn_builder = RPNBuilder(syntax_tokens)
     rpn_tokens = rpn_builder.build()
 
-    click.echo('RPN table')
+    click.echo('\nRPN steps table')
+    _print_table(get_rpn_table(rpn_builder))
+
+    click.echo('\nResulting RPN')
     click.echo(rpn_tokens)
 
     return rpn_tokens

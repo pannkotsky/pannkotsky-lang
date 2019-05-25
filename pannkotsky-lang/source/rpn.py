@@ -51,21 +51,33 @@ class RPNBuilder:
         self._stack = []
         self._output = []
 
+        self._rpn_steps = []
+        self._previous_output = ()
+        self._previous_stack = ()
+
+    @property
+    def rpn_steps(self):
+        return self._rpn_steps
+
     def build(self):
         """
         Process input tokens in infix form to postfix form according to Dijkstra algorithm.
         """
 
         for token in self._tokens:
+            self._previous_output = tuple(self._output)
+            self._previous_stack = tuple(self._stack[::-1])
             priority = self._PRIORITIES.get(token)
 
             # token is operand
             if priority is None:
                 self._output.append(token)
+                self._write_step(token)
                 continue
 
             if token == '(':
                 self._to_stack(token)
+                self._write_step(token)
                 continue
 
             if token == '\\n' and self._stack[-1] == '\\n' and 'if' in self._stack:
@@ -77,6 +89,7 @@ class RPNBuilder:
                 assert self._stack.pop() == 'if'
                 self._output.append('label')
                 self._to_stack(token)
+                self._write_step(token)
                 continue
 
             if token == '\\n' and 'until' in self._stack:
@@ -88,6 +101,7 @@ class RPNBuilder:
                 assert self._stack.pop() == 'repeat'
                 self._output.append('goto_if_not')
                 self._to_stack(token)
+                self._write_step(token)
                 continue
 
             # the only thing which can be in stack and not in self._PRIORITIES is label
@@ -97,12 +111,22 @@ class RPNBuilder:
 
             # either stack is empty or last operation priority is lower
             self._to_stack(token)
+            self._write_step(token)
 
         # input is empty
         while self._stack:
             self._stack_to_output()
 
-        return self._replace_labels(self._output)
+        self._output = self._replace_labels(self._output)
+        return self._output
+
+    def _write_step(self, token: str):
+        new_stack = tuple(self._stack[::-1])
+        self._rpn_steps.append((
+            token,
+            '\n'.join(new_stack) if new_stack != self._previous_stack else '',
+            '\n'.join(self._output[len(self._previous_output):])
+        ))
 
     def _to_stack(self, token: str):
         if self._stack and self._stack[-1] == '\\n':
