@@ -108,7 +108,7 @@ class SyntaxAnalyzer:
         return total_processed
 
     def operand(self, tokens: ScanTokens) -> int:
-        return self.check_token(tokens, ['_IDENT', '_CONST'])
+        return self.check_token(tokens, ['_IDENT', '_CONST', 'input'])
 
     def operation(self, tokens: ScanTokens) -> int:
         return self.check_token(tokens, ['+', '-', '*', '/', '^'])

@@ -32,6 +32,7 @@ tokens = [
     ('goto', 'goto statement'),
     ('label', 'label declaration'),
     ('print', 'output operator'),
+    ('input', 'input operator'),
     ('_IDENT', 'ident'),
     ('_CONST', 'const'),
     ('_LABEL', 'label'),

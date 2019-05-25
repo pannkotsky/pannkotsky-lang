@@ -22,6 +22,7 @@ class Executor:
         '!=': '_ne',
         'var': '_declare_ident',
         'print': '_print',
+        'input': '_input',
         'label': '_declare_label',
         'goto': '_goto',
         'goto_if_not': '_goto_if_not',
@@ -107,6 +108,14 @@ class Executor:
 
     def _print(self, arg):
         print(self._get_value(arg))
+
+    def _input(self):
+        while True:
+            inp = input("Enter integer number: ")
+            try:
+                return int(inp)
+            except ValueError:
+                print(f"{inp} is not a valid integer number")
 
     def _add(self, v1, v2):
         return self._get_value(v1, int) + self._get_value(v2, int)
