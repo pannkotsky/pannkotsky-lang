@@ -32,6 +32,7 @@ class Executor:
         self._tokens = tokens
         self._current_token_index = 0
         self._idents_registry = {}
+        self._output = []
 
     def execute(self):
         execution_stack = []
@@ -57,6 +58,8 @@ class Executor:
                     execution_stack.append(res)
 
             self._current_token_index += 1
+
+        return self._output
 
     def _get_operation(self, execution_stack: List):
         """ Returns method by operation name and args it requires. """
@@ -107,7 +110,7 @@ class Executor:
         return ident
 
     def _print(self, arg):
-        print(self._get_value(arg))
+        self._output.append(self._get_value(arg))
 
     def _input(self):
         while True:

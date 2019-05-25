@@ -28,6 +28,11 @@ h1 {
 
 .left-left {
     margin-right: 50px;
+    flex-basis: 50%;
+}
+
+.left-right {
+    flex-basis: 50%;
 }
 
 form {
@@ -65,6 +70,7 @@ table {
 
 table, th, td {
     border: 1px solid black;
+    white-space: pre-line;
 }
 
 th, td {

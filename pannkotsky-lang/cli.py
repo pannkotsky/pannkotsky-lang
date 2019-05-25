@@ -78,13 +78,13 @@ def _rpn(input_file):
 
 def _execute(input_file):
     rpn_tokens = _rpn(input_file)
-
     executor = Executor(rpn_tokens)
-
     click.echo('\n')
-    click.echo('Executor output')
+    output = executor.execute()
 
-    executor.execute()
+    click.echo('\nExecutor output')
+    for item in output:
+        click.echo(item)
 
 
 @click.group()

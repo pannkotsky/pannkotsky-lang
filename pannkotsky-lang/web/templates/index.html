@@ -43,6 +43,25 @@
                                 {% include 'table.html' %}
                             {% endwith %}
                         {% endif %}
+
+                        {% if rpn_steps_table %}
+                            <h3>RPN steps</h3>
+                            {% with table=rpn_steps_table %}
+                                {% include 'table.html' %}
+                            {% endwith %}
+                        {% endif %}
+
+                        {% if rpn_tokens %}
+                            <h3>RPN output</h3>
+                            <p style="white-space: pre-line">{{ rpn_tokens }}</p>
+                        {% endif %}
+
+                        {% if executor_output %}
+                            <h3>Executor output</h3>
+                            {% for item in executor_output %}
+                                <p>{{ item }}</p>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
                     <div class="left-right">
