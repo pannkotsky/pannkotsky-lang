@@ -1,0 +1,12 @@
+var a := 15 + (7 * 5) ^ 2
+var b := a / 20 - 13
+if b < 200
+repeat
+b := b + 50
+print b
+until b > 250
+
+
+print a
+print b
+

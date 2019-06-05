@@ -64,6 +64,7 @@ class State0(State):
         '>': 13,
         '=': 14,
         ' ': 15,
+        '!': 25,
     }
 
     @classmethod
@@ -236,6 +237,21 @@ class State24(FinalStateWithReturn):
     index = 24
 
 
+class State25(State):
+    """ Inequality in progress """
+    index = 25
+
+    @classmethod
+    def _get_next_state(cls, c):
+        if c == '=':
+            return 26
+
+
+class State26(FinalState):
+    """ Inequality completed """
+    index = 26
+
+
 states_map = {
     0: State0,
     1: State1,
@@ -262,6 +278,8 @@ states_map = {
     22: State22,
     23: State23,
     24: State24,
+    25: State25,
+    26: State26,
 }
 
 final_state_token_type_map = {

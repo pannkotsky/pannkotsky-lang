@@ -133,7 +133,7 @@ class SyntaxAnalyzer:
         return total_processed
 
     def logical_operation(self, tokens: ScanTokens) -> int:
-        return self.check_token(tokens, ['<', '>', '<=', '>=', '=='])
+        return self.check_token(tokens, ['<', '>', '<=', '>=', '==', '!='])
 
     def condition(self, tokens: ScanTokens) -> int:
         total_processed = 0

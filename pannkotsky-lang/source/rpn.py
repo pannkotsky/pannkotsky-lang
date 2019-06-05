@@ -9,7 +9,10 @@ def generate_label_name():
 
 def _get_next_index(index, tokens_map):
     max_index = max(tokens_map.keys())
-    if index >= max_index:
+    if index == max_index:
+        return index + 1
+
+    if index > max_index:
         raise KeyError
 
     try:
@@ -178,7 +181,10 @@ class RPNBuilder:
 
         indexes_list = sorted(tokens_map.keys())
         for label, value in labels_map.items():
-            labels_map[label] = str(indexes_list.index(value))
+            try:
+                labels_map[label] = str(indexes_list.index(value))
+            except ValueError:
+                labels_map[label] = str(len(indexes_list))
 
         for index, token in tokens_map.items():
             if token in labels_map:
